@@ -1,10 +1,11 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://devscribe-backend.onrender.com/api",
+  baseURL:
+    import.meta.env.MODE === "development"
+      ? "http://localhost:5000/api"
+      : "https://devscribe-backend.onrender.com/api",
 });
-
-// 🔑 Axios interceptor
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
@@ -17,5 +18,4 @@ api.interceptors.request.use(
   },
   (error) => Promise.reject(error)
 );
-
 export default api;

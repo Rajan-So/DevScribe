@@ -5,36 +5,30 @@ import api from "../api/axios";
 function Home() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const res = await api.get("/posts");
-        setPosts(res.data);
-      } catch (err) {
+    api
+      .get("/posts")
+      .then((res) => {
+        setPosts(Array.isArray(res.data) ? res.data : []);
+      })
+      .catch(() => {
         setError("Failed to load posts");
-      } finally {
+      })
+      .finally(() => {
         setLoading(false);
-      }
-    };
-
-    fetchPosts();
+      });
   }, []);
 
-  if (loading) {
-    return <p>Loading posts...</p>;
-  }
-
-  if (error) {
-    return <p style={{ color: "red" }}>{error}</p>;
-  }
+  if (loading) return <p>Loading posts...</p>;
+  if (error) return <p style={{ color: "red" }}>{error}</p>;
 
   return (
     <div>
       <h2>All Posts</h2>
 
-      {posts.length === 0 && <p>No posts yet</p>}
+      {posts.length === 0 && <p style={{ opacity: 0.7 }}>No posts published yet.</p>}
 
       {posts.map((post) => (
         <div key={post._id} style={{ marginBottom: "20px" }}>
@@ -43,12 +37,14 @@ function Home() {
           </h3>
 
           <p>
-            by <strong>{post.author?.username}</strong>
+            by <strong>{post.author?.username || "Unknown"}</strong>
           </p>
 
-          <small>
-            {new Date(post.createdAt).toLocaleDateString()}
-          </small>
+          {post.createdAt && (
+            <small>
+              {new Date(post.createdAt).toLocaleDateString()}
+            </small>
+          )}
         </div>
       ))}
     </div>
